@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Notifications\BroadcastNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Validation\Rule;
 
 class AdminUserController extends Controller
 {
@@ -20,33 +21,62 @@ class AdminUserController extends Controller
         return response()->json($users);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $user = User::findOrFail($id);
-        $user->update($request->only('name', 'email', 'role'));
+        $rules = [
+            'user_id' => 'required|exists:users,id',
+            'name' => 'sometimes|string|max:255',
+            'role' => 'sometimes|string',
+        ];
 
-        return response()->json(['message' => 'Update Successfully.', 'user' => $user]);
+        if ($request->has('email')) {
+            $rules['email'] = ['required', 'email', Rule::unique('users', 'email')->ignore($request->user_id)];
+        }
+
+        $request->validate($rules);
+
+        $user = User::findOrFail($request->user_id);
+
+        $updateData = array_filter($request->only('name', 'email', 'role'), fn ($value) => ! is_null($value));
+
+        $user->update($updateData);
+
+        return response()->json([
+            'message' => 'Update Successfully.',
+            'user' => $user,
+        ], 200);
     }
 
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        $user = User::findOrFail($id);
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+        $user = User::findOrFail($request->user_id);
         $user->delete();
 
-        return response()->json(['message' => 'User account deleted successfully.']);
+        return response()->json([
+            'message' => 'User account deleted successfully.',
+        ], 201);
     }
 
-    public function toggleBan($id)
+    public function toggleBan(Request $request)
     {
-        $user = User::findOrFail($id);
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $user = User::findOrFail($request->user_id);
 
         if ($user->hasRole('admin')) {
-            return response()->json(['message' => 'Admin accounts cannot be banned!'], 403);
+            return response()->json([
+                'message' => 'Admin accounts cannot be banned!',
+            ], 403);
         }
         $user->is_banned = ! $user->is_banned;
         $user->save();
 
-        $status = $user->is_banned ? 'banned' : 'Unbanned';
+        $status = $user->is_banned ? 'banned' : 'unbanned';
 
         return response()->json([
             'message' => "User has been successfully {$status}.",
