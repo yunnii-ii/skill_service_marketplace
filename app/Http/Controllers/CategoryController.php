@@ -36,16 +36,16 @@ class CategoryController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $category = Category::find($id);
+        $request->validate([
+            'category_id' => 'required|exists:categories,id',
+        ]);
 
-        if (! $category) {
-            return response()->json(['message' => 'Category not found.'], 404);
-        }
+        $category = Category::find($request->category_id);
 
         $request->validate([
-            'name' => 'required|string|unique:categories,name,'.$id,
+            'name' => 'required|string|unique:categories,name,'.$category->id,
         ]);
 
         $category->update([
@@ -60,14 +60,13 @@ class CategoryController extends Controller
         ], 200);
     }
 
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        $category = Category::find($id);
+        $request->validate([
+            'category_id' => 'required|exists:categories,id',
+        ]);
 
-        if (! $category) {
-            return response()->json(['message' => 'Category not found.'], 404);
-        }
-
+        $category = Category::find($request->category_id);
         $category->delete();
 
         return response()->json([

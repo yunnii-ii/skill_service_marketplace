@@ -28,7 +28,7 @@ Route::post('/verify-email', [VerificationController::class, 'verify']);
 Route::post('/forgot-password', [ForgotPasswordController::class, 'store']);
 Route::post('/reset-password', [ResetPasswordController::class, 'store']);
 
-Route::get('/seller/{id}/reviews', [ReviewController::class, 'getSellerReviews']);
+Route::post('/seller/reviews', [ReviewController::class, 'getSellerReviews']);
 
 Route::get('/services', [ServiceController::class, 'index']);
 Route::get('/services/top-rated', [ServiceController::class, 'topRated']);
@@ -38,72 +38,54 @@ Route::get('/guest/services', [BookingController::class, 'availableServices']);
 Route::get('categories', [CategoryController::class, 'index']);
 
 // Protected Routes
-
 Route::middleware('auth:sanctum')->group(function () {
 
     // Dashboard & Profile
-
     Route::get('/dashboard', [DashboardController::class, 'index']);
-
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
 
     // Notifications
-
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::post('/notifications/mark-as-read', [NotificationController::class, 'markAsRead']);
 
     // Reviews
-
     Route::post('/buyer/reviews', [ReviewController::class, 'store']);
 
     // Messages / Chat
-
     Route::post('/chat/send', [MessageController::class, 'store']);
-    Route::get('/chat/history/{userId}', [MessageController::class, 'getMessages']);
-
-    // Admin Routes
-
-    Route::prefix('admin')->group(function () {
-
-        Route::get('/users', [AdminUserController::class, 'index']);
-
-        Route::put('/users/{id}', [AdminUserController::class, 'update']);
-
-        Route::delete('/users/{id}', [AdminUserController::class, 'destroy']);
-
-        Route::post('/users/{id}/toggle-ban', [AdminUserController::class, 'toggleBan']);
-
-        Route::get('/dashboard-stats', [AdminUserController::class, 'getDashboardStats']);
-    });
+    Route::post('/chat/history', [MessageController::class, 'getMessages']);
 
     // Seller Routes
-
     Route::prefix('seller')->group(function () {
-
         Route::post('/services', [ServiceController::class, 'store']);
-
-        Route::put('/services/{id}', [ServiceController::class, 'update']);
-
-        Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
-
-        Route::post('/bookings/{id}/status', [ServiceController::class, 'changeBookingStatus']);
+        Route::post('/services/update', [ServiceController::class, 'update']);
+        Route::post('/services/delete', [ServiceController::class, 'destroy']);
+        Route::post('/bookings/change-status', [ServiceController::class, 'changeBookingStatus']);
     });
 
     // Buyer Routes
-
     Route::prefix('buyer')->group(function () {
-
         Route::post('/book-service', [BookingController::class, 'store']);
-
         Route::get('/my-orders', [BookingController::class, 'myBookings']);
     });
 
 });
 
+// Admin Routes
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
-    Route::post('categories', [CategoryController::class, 'store']);
-    Route::put('categories/{id}', [CategoryController::class, 'update']);
-    Route::delete('categories/{id}', [CategoryController::class, 'destroy']);
+
+    // Admin User Management
+    Route::get('/users', [AdminUserController::class, 'index']);
+    Route::put('/users/update', [AdminUserController::class, 'update']);
+    Route::post('/users/delete', [AdminUserController::class, 'destroy']);
+    Route::post('/users/toggle-ban', [AdminUserController::class, 'toggleBan']);
+    Route::get('/dashboard-stats', [AdminUserController::class, 'getDashboardStats']);
     Route::post('broadcast', [AdminUserController::class, 'broadcastMessage']);
+
+    // Admin Category Management
+    Route::post('categories', [CategoryController::class, 'store']);
+    Route::post('categories/update', [CategoryController::class, 'update']);
+    Route::post('categories/delete', [CategoryController::class, 'destroy']);
+
 });
