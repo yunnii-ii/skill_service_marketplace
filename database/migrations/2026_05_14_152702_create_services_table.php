@@ -14,10 +14,12 @@ return new class extends Migration
         Schema::create('services', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->string('title');
             $table->text('description');
-            $table->decimal('price', 10 ,2);
+            $table->decimal('price', 10, 2);
             $table->string('estimated_days');
+            $table->string('image')->nullable();
             $table->timestamps();
         });
     }

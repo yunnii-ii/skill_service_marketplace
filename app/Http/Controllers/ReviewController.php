@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 
 class ReviewController extends Controller
 {
-    //
     public function store(Request $request)
     {
         $request->validate([
@@ -16,19 +15,31 @@ class ReviewController extends Controller
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string',
         ]);
+
         $booking = Booking::findOrFail($request->booking_id);
+
         if ($booking->buyer_id !== auth()->id()) {
-            return response()->json(['message' => 'Unauthorized. You can only review your own bookings.'], 403);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized. You can only review your own bookings.',
+            ], 403);
         }
 
         if ($booking->status !== 'completed') {
-            return response()->json(['message' => 'You can only review completed bookings.'], 400);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You can only review completed bookings.',
+            ], 400);
         }
 
         $exists = Review::where('booking_id', $booking->id)->exists();
         if ($exists) {
-            return response()->json(['message' => 'You have already reviewed this booking.'], 400);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You have already reviewed this booking.',
+            ], 400);
         }
+
         $review = Review::create([
             'booking_id' => $booking->id,
             'buyer_id' => auth()->id(),
@@ -38,8 +49,9 @@ class ReviewController extends Controller
         ]);
 
         return response()->json([
+            'status' => 'successful',
             'message' => 'Review submitted successfully!',
-            'review' => $review,
+            'data' => $review,
         ], 201);
     }
 
@@ -56,14 +68,16 @@ class ReviewController extends Controller
             ->latest()
             ->get();
 
-        $averageRating = Review::where('seller_id', $sellerId)->avg('rating');
+        $averageRating = $reviews->avg('rating');
 
         return response()->json([
-            'success' => true,
-            'seller_id' => $sellerId,
-            'average_rating' => $averageRating ? round($averageRating, 1) : 0,
-            'total_reviews' => $reviews->count(),
-            'reviews' => $reviews,
-        ], 201);
+            'status' => 'successful',
+            'data' => [
+                'seller_id' => (int) $sellerId,
+                'average_rating' => $averageRating ? round($averageRating, 1) : 0,
+                'total_reviews' => $reviews->count(),
+                'reviews' => $reviews,
+            ],
+        ], 200);
     }
 }

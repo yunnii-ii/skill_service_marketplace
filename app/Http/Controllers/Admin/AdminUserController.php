@@ -9,6 +9,7 @@ use App\Models\Service;
 use App\Models\User;
 use App\Notifications\BroadcastNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\Rule;
 
@@ -18,7 +19,10 @@ class AdminUserController extends Controller
     {
         $users = User::withoutRole('admin')->get();
 
-        return response()->json($users);
+        return response()->json([
+            'status' => 'successful',
+            'data' => $users,
+        ], 200);
     }
 
     public function update(Request $request)
@@ -38,10 +42,10 @@ class AdminUserController extends Controller
         $user = User::findOrFail($request->user_id);
 
         $updateData = array_filter($request->only('name', 'email', 'role'), fn ($value) => ! is_null($value));
-
         $user->update($updateData);
 
         return response()->json([
+            'status' => 'successful',
             'message' => 'Update Successfully.',
             'user' => $user,
         ], 200);
@@ -52,14 +56,25 @@ class AdminUserController extends Controller
         $request->validate([
             'user_id' => 'required|exists:users,id',
         ]);
+
         $user = User::findOrFail($request->user_id);
+
+        if ($user->id === Auth::id()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You cannot delete your own admin account.',
+            ], 403);
+        }
+
         $user->delete();
 
         return response()->json([
+            'status' => 'successful',
             'message' => 'User account deleted successfully.',
-        ], 201);
+        ], 200);
     }
 
+    // (Toggle Ban)
     public function toggleBan(Request $request)
     {
         $request->validate([
@@ -70,20 +85,24 @@ class AdminUserController extends Controller
 
         if ($user->hasRole('admin')) {
             return response()->json([
+                'status' => 'error',
                 'message' => 'Admin accounts cannot be banned!',
             ], 403);
         }
+
         $user->is_banned = ! $user->is_banned;
         $user->save();
 
         $status = $user->is_banned ? 'banned' : 'unbanned';
 
         return response()->json([
+            'status' => 'successful',
             'message' => "User has been successfully {$status}.",
             'user' => $user,
-        ], 201);
+        ], 200);
     }
 
+    // Dashboard
     public function getDashboardStats()
     {
         $totalUsers = User::count();
@@ -96,7 +115,7 @@ class AdminUserController extends Controller
         $completedBookings = Booking::where('status', 'completed')->count();
 
         return response()->json([
-            'status' => 'success',
+            'status' => 'successful',
             'data' => [
                 'users' => [
                     'total' => $totalUsers,
@@ -106,7 +125,6 @@ class AdminUserController extends Controller
                 'categories' => [
                     'total' => $totalCategories,
                 ],
-
                 'services' => [
                     'total' => $totalServices,
                 ],
@@ -116,7 +134,7 @@ class AdminUserController extends Controller
                     'completed' => $completedBookings,
                 ],
             ],
-        ], 201);
+        ], 200);
     }
 
     public function broadcastMessage(Request $request)
@@ -133,8 +151,34 @@ class AdminUserController extends Controller
         Notification::send($users, new BroadcastNotification($request->title, $request->message));
 
         return response()->json([
-            'success' => true,
+            'status' => 'successful',
             'message' => 'Broadcast notification sent successfully to all users.',
-        ], 201);
+        ], 200);
+    }
+
+    // Approve User
+    public function approveUser(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $user = User::findOrFail($request->user_id);
+
+        if ($user->is_approved) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'This user account is already approved.',
+            ], 400);
+        }
+
+        $user->is_approved = true;
+        $user->save();
+
+        return response()->json([
+            'status' => 'successful',
+            'message' => "User {$user->name} has been successfully approved and notified.",
+            'user' => $user,
+        ], 200);
     }
 }

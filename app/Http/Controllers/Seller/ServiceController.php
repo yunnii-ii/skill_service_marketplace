@@ -47,21 +47,31 @@ class ServiceController extends Controller
             ], 403);
         }
         $request->validate([
-            'title' => 'required|string',
-            'description' => 'required',
+            'category_id' => 'required|exists:categories,id',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
             'price' => 'required|numeric',
             'estimated_days' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
+
+        $imagePath = null;
+
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('services', 'public');
+        }
 
         $service = Service::create([
             'user_id' => Auth::id(),
+            'category_id' => $request->category_id,
             'title' => $request->title,
             'description' => $request->description,
             'price' => $request->price,
             'estimated_days' => $request->estimated_days,
+            'image' => $imagePath,
         ]);
 
-        return response()->json(['message' => 'Service create successful..', 'service' => $service]);
+        return response()->json(['message' => 'Service create successful..', 'service' => $service], 201);
     }
 
     public function update(Request $request)
@@ -98,7 +108,7 @@ class ServiceController extends Controller
     {
         $request->validate([
             'booking_id' => 'required|exists:bookings,id',
-            'status' => 'required|in:pending,accepted,rejected,completed,cancelled', // status တွေ ကွက်တိ စစ်ပါတယ်
+            'status' => 'required|in:pending,accepted,rejected,completed,cancelled',
         ]);
 
         $booking = Booking::where('seller_id', Auth::id())->findOrFail($request->booking_id);
