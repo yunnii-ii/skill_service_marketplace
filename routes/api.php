@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
@@ -18,7 +19,6 @@ use App\Http\Controllers\Seller\ServiceController;
 use Illuminate\Support\Facades\Route;
 
 // Public Routes
-
 Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/login', [LoginController::class, 'store']);
 Route::post('/admin/login', [AdminLoginController::class, 'store']);
@@ -44,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
+    Route::post('/auth/change-password', [PasswordController::class, 'changePassword']);
 
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index']);
@@ -82,6 +83,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::post('/users/toggle-ban', [AdminUserController::class, 'toggleBan']);
     Route::get('/dashboard-stats', [AdminUserController::class, 'getDashboardStats']);
     Route::post('broadcast', [AdminUserController::class, 'broadcastMessage']);
+    Route::post('/users/approve', [AdminUserController::class, 'approveUser']);
 
     // Admin Category Management
     Route::post('categories', [CategoryController::class, 'store']);
