@@ -19,9 +19,43 @@ class AdminUserController extends Controller
     {
         $users = User::withoutRole('admin')->get();
 
+        $formattedUsers = $users->map(function ($user) {
+
+            // $approvedStatus = 'pending';
+            // if ($user->is_approved == 1) {
+            //     $approvedStatus = 'approved';
+            // } elseif ($user->is_approved == 2) {
+            //     $approvedStatus = 'rejected';
+            // }
+
+            $bannedStatus = 'active';
+            if ($user->is_banned == 1) {
+                $bannedStatus = 'suspended';
+            } elseif ($user->is_banned == 2) {
+                $bannedStatus = 'permanently_banned';
+            }
+
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->getRoleNames()->first() ?? 'buyer',
+                'Status' => $bannedStatus,
+                'phone_number' => $user->phone_number,
+                'company_name' => $user->company_name,
+                'position' => $user->position,
+                'address' => $user->address,
+                'avatar' => $user->avatar,
+                'cover_photo' => $user->cover_photo,
+                'bio' => $user->bio,
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ];
+        });
+
         return response()->json([
             'success' => 'true',
-            'data' => $users,
+            'data' => $formattedUsers,
         ]);
     }
 
@@ -93,7 +127,7 @@ class AdminUserController extends Controller
         $user->is_banned = ! $user->is_banned;
         $user->save();
 
-        $status = $user->is_banned ? 'banned' : 'unbanned';
+        $status = $user->is_banned ? 'Active' : 'Inactive';
 
         return response()->json([
             'success' => 'true',
@@ -159,9 +193,6 @@ class AdminUserController extends Controller
     // Approve User
     public function approveUser(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-        ]);
 
         $user = User::findOrFail($request->user_id);
 
@@ -176,9 +207,21 @@ class AdminUserController extends Controller
         $user->save();
 
         return response()->json([
-            'success' => 'true',
+            'successf' => 'true',
             'message' => "User {$user->name} has been successfully approved and notified.",
             'data' => $user,
+        ]);
+    }
+
+    public function approveSeller(Request $request)
+    {
+        $user = User::findOrFail($request->user_id);
+
+        $user->syncRoles(['seller']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'You approved this user',
         ]);
     }
 }

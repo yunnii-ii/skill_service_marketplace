@@ -20,8 +20,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'check.banned' => CheckBannedUser::class,
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
-            'role_or_permissoin' => RoleOrPermissionMiddleware::class,
+            'role_or_permission' => RoleOrPermissionMiddleware::class,
         ]);
+
+        // $middleware->validateCsrfTokens(except: [
+        //     'api/*',
+        // ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

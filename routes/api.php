@@ -4,7 +4,7 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\PasswordController;
+// use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
@@ -45,9 +45,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
-    Route::post('/auth/change-password', [PasswordController::class, 'changePassword']);
-    Route::post('/user/submit-seller-profile', [SellerRequestController::class, 'submitSellerRequest']);
-    Route::put('/admin/approve-seller/{userId}', [SellerRequestController::class, 'approveSeller']);
+    // Route::post('/auth/change-password', [PasswordController::class, 'changePassword']);
+    Route::post('/user/submit-seller-request', [SellerRequestController::class, 'submitSellerRequest']);
+    Route::put('/admin/approve-seller', [AdminUserController::class, 'approveSeller']);
 
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index']);
