@@ -14,13 +14,22 @@ class VerificationController extends Controller
         $user=User::where('email', $request->email)->first();
 
         if (!$user){
-            return response()->json(['message'=> 'User not found.'],404);
+            return response()->json([
+                'success' => 'false',
+                'message' => 'User not found.'
+            ], 404);
         }
         if ($user->email_verified_at !== null){
-            return response()->json(['message'=> 'This account has been already verified.']);
+            return response()->json([
+                'success' => 'false',
+                'message' => 'This account has been already verified.'
+            ]);
         }
         $user->email_verified_at=now();
         $user->save();
-        return response()->json(['message'=> 'Email Verification is successful.']);
+        return response()->json([
+            'success' => 'true',
+            'message' => 'Email Verification is successful.'
+        ]);
     }
 }

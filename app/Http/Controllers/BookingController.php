@@ -20,17 +20,17 @@ class BookingController extends Controller
             ->get();
 
         return response()->json([
-            'status' => 'successful',
+            'success' => 'true',
             'message' => 'Available services',
-            'services' => $services,
-        ], 200);
+            'data' => $services,
+        ]);
     }
 
     public function store(Request $request)
     {
         if (! Auth::user()->hasRole('buyer')) {
             return response()->json([
-                'status' => 'error',
+                'success' => 'false',
                 'message' => 'Only buyer can book services',
             ], 403);
         }
@@ -44,7 +44,7 @@ class BookingController extends Controller
 
         if ($service->user_id === Auth::id()) {
             return response()->json([
-                'status' => 'error',
+                'success' => 'false',
                 'message' => 'You cannot book your own service.',
             ], 400);
         }
@@ -64,9 +64,9 @@ class BookingController extends Controller
         }
 
         return response()->json([
-            'status' => 'successful',
+            'success' => 'true',
             'message' => 'Booking successful!',
-            'booking' => $booking,
+            'data' => $booking,
         ], 201);
     }
 
@@ -78,8 +78,8 @@ class BookingController extends Controller
             ->get();
 
         return response()->json([
-            'status' => 'successful',
+            'success' => 'true',
             'data' => $bookings,
-        ], 200);
+        ]);
     }
 }

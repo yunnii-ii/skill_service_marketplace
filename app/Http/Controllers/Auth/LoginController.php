@@ -19,18 +19,24 @@ class LoginController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Email or password is wrong.'], 401);
+            return response()->json([
+                'success' => 'false',
+                'message' => 'Email or password is wrong.',
+            ], 401);
         }
 
         if (! $user->hasRole('admin') && $user->is_approved == false) {
             return response()->json([
-                'status' => 'error',
+                'success' => 'false',
                 'message' => 'Your account is pending for admin approval. You cannot log in yet.',
             ], 403);
         }
 
         if ($user->is_banned) {
-            return response()->json(['message' => 'Your account has been banned, cannot login.'], 403);
+            return response()->json([
+                'success' => 'false',
+                'message' => 'Your account has been banned, cannot login.',
+            ], 403);
         }
         $token = $user->createToken('auth_token')->plainTextToken;
         $role = 'buyer';
@@ -41,6 +47,7 @@ class LoginController extends Controller
         }
 
         return response()->json([
+            'success' => 'true',
             'message' => 'Login is successful.',
             'token' => $token,
             'user' => [

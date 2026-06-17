@@ -20,7 +20,7 @@ class PasswordController extends Controller
 
         if (! Hash::check($request->current_password, $user->password)) {
             return response()->json([
-                'status' => 'error',
+                'success' => 'false',
                 'message' => 'Current password does not match.',
             ], 400);
         }
@@ -29,8 +29,8 @@ class PasswordController extends Controller
         $user->save();
 
         return response()->json([
-            'status' => 'successful',
+            'success' => 'true',
             'message' => 'Password changed successfully.',
-        ], 200);
+        ]);
     }
 }
