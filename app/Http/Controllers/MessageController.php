@@ -29,6 +29,7 @@ class MessageController extends Controller
         }
 
         return response()->json([
+            'success' => 'true',
             'message' => 'Message sent',
             'chat' => $chat,
         ]);
@@ -55,7 +56,7 @@ class MessageController extends Controller
             ->get();
 
         return response()->json([
-            'status' => 'successful',
+            'success' => 'true',
             'message' => $chats,
         ], 201);
     }

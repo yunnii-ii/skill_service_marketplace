@@ -20,14 +20,14 @@ class ReviewController extends Controller
 
         if ($booking->buyer_id !== auth()->id()) {
             return response()->json([
-                'status' => 'error',
+                'success' => 'false',
                 'message' => 'Unauthorized. You can only review your own bookings.',
             ], 403);
         }
 
         if ($booking->status !== 'completed') {
             return response()->json([
-                'status' => 'error',
+                'success' => 'false',
                 'message' => 'You can only review completed bookings.',
             ], 400);
         }
@@ -35,7 +35,7 @@ class ReviewController extends Controller
         $exists = Review::where('booking_id', $booking->id)->exists();
         if ($exists) {
             return response()->json([
-                'status' => 'error',
+                'success' => 'false',
                 'message' => 'You have already reviewed this booking.',
             ], 400);
         }
@@ -49,7 +49,7 @@ class ReviewController extends Controller
         ]);
 
         return response()->json([
-            'status' => 'successful',
+            'success' => 'true',
             'message' => 'Review submitted successfully!',
             'data' => $review,
         ], 201);
@@ -71,7 +71,7 @@ class ReviewController extends Controller
         $averageRating = $reviews->avg('rating');
 
         return response()->json([
-            'status' => 'successful',
+            'success' => 'true',
             'data' => [
                 'seller_id' => (int) $sellerId,
                 'average_rating' => $averageRating ? round($averageRating, 1) : 0,

@@ -15,10 +15,16 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('phone_number')->nullable();
+            $table->string('company_name')->nullable();
+            $table->string('position')->nullable();
+            $table->text('address')->nullable();
+            $table->string('avatar')->nullable();
+            $table->string('cover_photo')->nullable();
             // $table->boolean('is_banned')->default(false);
-            $table->text('profile_bio')->nullable();
+            $table->text('bio')->nullable();
+            $table->boolean('is_approved')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });

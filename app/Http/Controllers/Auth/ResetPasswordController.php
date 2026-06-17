@@ -17,10 +17,16 @@ class ResetPasswordController extends Controller
         ]);
         $user =User::where('email', $request->email)->first();
         if (!$user){
-            return response()->json(['message'=>'User not found'],404);
+            return response()->json([
+                'success' => 'false',
+                'message' => 'User not found'
+            ], 404);
         }
         $user->password=Hash::make($request->password);
         $user->save();
-        return response()->json(['message'=>'Password changed successfully']);
+        return response()->json([
+            'success' => 'true',
+            'message' => 'Password changed successfully'
+        ]);
     }
 }

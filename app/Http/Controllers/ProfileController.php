@@ -10,7 +10,7 @@ class ProfileController extends Controller
     //
     public function show(){
         return response()->json([
-            'status'=> 'success',
+            'success'=> 'true',
             'data'=> Auth::user()
         ], 200);
     }
@@ -18,7 +18,7 @@ class ProfileController extends Controller
         $user= Auth::user();
         if (!$user->hasAnyRole(['buyer', 'seller'])){
             return response()->json([
-                'status'=>'error',
+                'success'=>'false',
                 'message'=>'You do not have permission to edit this profile'], 403);
         }
         $request->validate([
@@ -32,13 +32,16 @@ class ProfileController extends Controller
         ]);
 
         return response()->json([
-            'status'=>'successful',
+            'success'=>'true',
             'message'=>'Profile updated successfully.',
             'data'=> $user
         ], 200);
     }
 
     public function  getNotifications(){
-        return response()->json(auth()->user()->unreadNotifications);
+        return response()->json([
+            'success' => 'true',
+            'data' => auth()->user()->unreadNotifications
+        ]);
 }
 }

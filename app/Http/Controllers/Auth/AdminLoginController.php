@@ -33,9 +33,10 @@ class AdminLoginController extends Controller
         $token = $user->createToken('admin_token')->plainTextToken;
 
         return response()->json([
+            'success' => 'true',
             'message' => 'Admin login successful',
             'token' => $token,
-            'user' => $user
+            'data' => $user
         ]);
     }
 }

@@ -17,7 +17,7 @@ class DashboardController extends Controller
         $user = Auth::user();
         if ($user->hasRole('admin')){
             return response()->json([
-                'status'=> 'successs',
+                'success'=> 'true',
                 'role' => 'admin',
                  'data' => [
                      'users'=> User::count(),
@@ -25,7 +25,7 @@ class DashboardController extends Controller
                      'bookings'=> Booking::count(),
                      'reviews' => Review::count()
                  ]
-            ], 200);
+            ]);
             }
 
             //if ($user->hasRole('seller'))

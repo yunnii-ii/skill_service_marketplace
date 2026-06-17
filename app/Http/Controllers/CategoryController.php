@@ -15,7 +15,7 @@ class CategoryController extends Controller
         return response()->json([
             'success' => true,
             'data' => $categories,
-        ], 200);
+        ]);
     }
 
     public function store(Request $request)
@@ -57,7 +57,7 @@ class CategoryController extends Controller
             'success' => true,
             'message' => 'Category updated successfully.',
             'data' => $category,
-        ], 200);
+        ]);
     }
 
     public function destroy(Request $request)
@@ -72,6 +72,6 @@ class CategoryController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Category deleted successfully.',
-        ], 200);
+        ]);
     }
 }

@@ -20,9 +20,9 @@ class AdminUserController extends Controller
         $users = User::withoutRole('admin')->get();
 
         return response()->json([
-            'status' => 'successful',
+            'success' => 'true',
             'data' => $users,
-        ], 200);
+        ]);
     }
 
     public function update(Request $request)
@@ -45,10 +45,10 @@ class AdminUserController extends Controller
         $user->update($updateData);
 
         return response()->json([
-            'status' => 'successful',
+            'success' => 'true',
             'message' => 'Update Successfully.',
-            'user' => $user,
-        ], 200);
+            'data' => $user,
+        ]);
     }
 
     public function destroy(Request $request)
@@ -61,17 +61,17 @@ class AdminUserController extends Controller
 
         if ($user->id === Auth::id()) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'You cannot delete your own admin account.',
+                'success' => 'false',
+                'message' => 'Error! You cannot delete your own admin account.',
             ], 403);
         }
 
         $user->delete();
 
         return response()->json([
-            'status' => 'successful',
+            'success' => 'true',
             'message' => 'User account deleted successfully.',
-        ], 200);
+        ]);
     }
 
     // (Toggle Ban)
@@ -85,8 +85,8 @@ class AdminUserController extends Controller
 
         if ($user->hasRole('admin')) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Admin accounts cannot be banned!',
+                'success' => 'false',
+                'message' => 'Error! Admin accounts cannot be banned!',
             ], 403);
         }
 
@@ -96,10 +96,10 @@ class AdminUserController extends Controller
         $status = $user->is_banned ? 'banned' : 'unbanned';
 
         return response()->json([
-            'status' => 'successful',
-            'message' => "User has been successfully {$status}.",
-            'user' => $user,
-        ], 200);
+            'success' => 'true',
+            'message' => "User has been successfully {$success}.",
+            'data' => $user,
+        ]);
     }
 
     // Dashboard
@@ -115,7 +115,7 @@ class AdminUserController extends Controller
         $completedBookings = Booking::where('status', 'completed')->count();
 
         return response()->json([
-            'status' => 'successful',
+            'success' => 'true',
             'data' => [
                 'users' => [
                     'total' => $totalUsers,
@@ -134,7 +134,7 @@ class AdminUserController extends Controller
                     'completed' => $completedBookings,
                 ],
             ],
-        ], 200);
+        ]);
     }
 
     public function broadcastMessage(Request $request)
@@ -151,7 +151,7 @@ class AdminUserController extends Controller
         Notification::send($users, new BroadcastNotification($request->title, $request->message));
 
         return response()->json([
-            'status' => 'successful',
+            'success' => 'true',
             'message' => 'Broadcast notification sent successfully to all users.',
         ], 200);
     }
@@ -167,7 +167,7 @@ class AdminUserController extends Controller
 
         if ($user->is_approved) {
             return response()->json([
-                'status' => 'error',
+                'success' => 'false',
                 'message' => 'This user account is already approved.',
             ], 400);
         }
@@ -176,9 +176,9 @@ class AdminUserController extends Controller
         $user->save();
 
         return response()->json([
-            'status' => 'successful',
+            'success' => 'true',
             'message' => "User {$user->name} has been successfully approved and notified.",
-            'user' => $user,
-        ], 200);
+            'data' => $user,
+        ]);
     }
 }

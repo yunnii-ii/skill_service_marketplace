@@ -16,6 +16,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\Seller\ServiceController;
+use App\Http\Controllers\SellerRequestController;
 use Illuminate\Support\Facades\Route;
 
 // Public Routes
@@ -45,6 +46,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
     Route::post('/auth/change-password', [PasswordController::class, 'changePassword']);
+    Route::post('/user/submit-seller-profile', [SellerRequestController::class, 'submitSellerRequest']);
+    Route::put('/admin/approve-seller/{userId}', [SellerRequestController::class, 'approveSeller']);
 
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index']);

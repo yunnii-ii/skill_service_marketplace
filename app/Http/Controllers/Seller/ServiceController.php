@@ -42,7 +42,7 @@ class ServiceController extends Controller
     {
         if (! auth()->user()->hasRole('seller')) {
             return response()->json([
-                'status' => 'error',
+                'success' => 'false',
                 'message' => 'Only sellers are allowed to post services. ',
             ], 403);
         }
@@ -71,7 +71,11 @@ class ServiceController extends Controller
             'image' => $imagePath,
         ]);
 
-        return response()->json(['message' => 'Service create successful..', 'service' => $service], 201);
+        return response()->json([
+            'success' => 'true',
+            'message' => 'Service create successful..',
+            'data' => $service
+        ], 201);
     }
 
     public function update(Request $request)
@@ -85,8 +89,9 @@ class ServiceController extends Controller
         $service->update($request->all());
 
         return response()->json([
+            'success' => 'true',
             'message' => 'Service updated successfully.',
-            'service' => $service,
+            'data' => $service,
         ], 200);
     }
 
@@ -100,8 +105,9 @@ class ServiceController extends Controller
         $service->delete();
 
         return response()->json([
+            'success' => 'true',
             'message' => 'Service deleted successfully.',
-        ], 200);
+        ]);
     }
 
     public function changeBookingStatus(Request $request)
@@ -124,8 +130,9 @@ class ServiceController extends Controller
         }
 
         return response()->json([
+            'success' => 'true',
             'message' => 'Status have been changed.',
-            'booking' => $booking,
+            'data' => $booking,
         ], 200);
     }
 
