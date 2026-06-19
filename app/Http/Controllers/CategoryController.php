@@ -24,9 +24,18 @@ class CategoryController extends Controller
             'name' => 'required|string|unique:categories,name',
         ]);
 
+        $slug = Str::slug($request->name);
+
+        if (Category::where('slug', $slug)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This category already exists.',
+            ], 422);
+        }
+
         $category = Category::create([
             'name' => $request->name,
-            'slug' => Str::slug($request->name),
+            'slug' => $slug,
         ]);
 
         return response()->json([

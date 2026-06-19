@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_banned')->default(false)->after('email');
+            $table->tinyInteger('is_banned')->default(0)->after('email');
         });
     }
 

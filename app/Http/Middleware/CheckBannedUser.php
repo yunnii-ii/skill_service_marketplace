@@ -16,10 +16,11 @@ class CheckBannedUser
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(Auth::check() && Auth::user()->is_banned){
+        if (Auth::check() && (int) Auth::user()->is_banned !== 0) {
             Auth::user()->currentAccessToken()->delete();
+
             return response()->json([
-                'message' => 'Your account has banned by the administrator.'
+                'message' => 'Your account is not active. Please contact the administrator.',
             ], 403);
         }
         return $next($request);

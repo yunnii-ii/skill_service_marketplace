@@ -21,7 +21,6 @@ class RegisterController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'is_approved' => false,
         ]);
 
         $user->assignRole('buyer');
@@ -30,9 +29,9 @@ class RegisterController extends Controller
 
         return response()->json([
             'success' => 'true',
-            'message' => 'Register is successful.Please wait for admin approval before logging in.',
+            'message' => 'Register is successful. You can now log in.',
             'token' => $token,
-            'data' => $user->load('roles'),
+            'data' => $user
         ], 201);
     }
 }

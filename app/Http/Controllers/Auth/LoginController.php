@@ -25,19 +25,22 @@ class LoginController extends Controller
             ], 401);
         }
 
-        if (! $user->hasRole('admin') && $user->is_approved == false) {
+        if ((int) $user->is_banned === 1) {
             return response()->json([
                 'success' => 'false',
-                'message' => 'Your account is pending for admin approval. You cannot log in yet.',
+                'message' => 'Your account is inactive, cannot login.',
             ], 403);
         }
 
-        if ($user->is_banned) {
+        if ((int) $user->is_banned === 2) {
             return response()->json([
                 'success' => 'false',
-                'message' => 'Your account has been banned, cannot login.',
+                'message' => 'Your account has been suspended, cannot login.',
             ], 403);
         }
+
+        $user->load('roles');
+
         $token = $user->createToken('auth_token')->plainTextToken;
         $role = 'buyer';
         if ($user->hasRole('admin')) {
@@ -50,12 +53,20 @@ class LoginController extends Controller
             'success' => 'true',
             'message' => 'Login is successful.',
             'token' => $token,
-            'user' => [
+            'data' => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $role,
-                'profile_bio' => $user->profile_bio,
+                'phone_number' => $user->phone_number,
+                'company_name' => $user->company_name,
+                'position' => $user->position,
+                'address' => $user->address,
+                'avatar' => $user->avatar,
+                'avatar_url' => $user->avatar ? asset('storage/'.$user->avatar) : null,
+                'cover_photo' => $user->cover_photo,
+                'cover_photo_url' => $user->cover_photo ? asset('storage/'.$user->cover_photo) : null,
+                'bio' => $user->bio,
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
             ],
