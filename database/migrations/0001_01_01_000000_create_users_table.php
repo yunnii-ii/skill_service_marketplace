@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('cover_photo')->nullable();
             // $table->boolean('is_banned')->default(false);
             $table->text('bio')->nullable();
-            $table->boolean('is_approved')->default(false);
+            $table->tinyInteger('is_approved')->default(0);
             $table->rememberToken();
             $table->timestamps();
         });

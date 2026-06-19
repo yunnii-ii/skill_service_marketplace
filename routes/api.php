@@ -45,9 +45,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
+    Route::post('/profile/update', [ProfileController::class, 'update']);
     // Route::post('/auth/change-password', [PasswordController::class, 'changePassword']);
     Route::post('/user/submit-seller-request', [SellerRequestController::class, 'submitSellerRequest']);
-    Route::put('/admin/approve-seller', [AdminUserController::class, 'approveSeller']);
 
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index']);
@@ -79,17 +79,30 @@ Route::middleware('auth:sanctum')->group(function () {
 // Admin Routes
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
 
+    // Admin Auth
+    Route::get('/profile', [AdminLoginController::class, 'profile']);
+    Route::post('/profile/update', [AdminLoginController::class, 'updateProfile']);
+    Route::post('/profile/delete-details', [AdminLoginController::class, 'deleteProfileDetails']);
+    Route::post('/logout', [AdminLoginController::class, 'logout']);
+
     // Admin User Management
     Route::get('/users', [AdminUserController::class, 'index']);
+    Route::get('/users/show/{user_id?}', [AdminUserController::class, 'show']);
     Route::put('/users/update', [AdminUserController::class, 'update']);
     Route::post('/users/delete', [AdminUserController::class, 'destroy']);
     Route::post('/users/toggle-ban', [AdminUserController::class, 'toggleBan']);
     Route::get('/dashboard-stats', [AdminUserController::class, 'getDashboardStats']);
+    Route::get('/services', [AdminUserController::class, 'services']);
+    Route::get('/services/show/{service_id?}', [AdminUserController::class, 'showService']);
+    Route::post('/services/delete', [AdminUserController::class, 'deleteService']);
     Route::post('broadcast', [AdminUserController::class, 'broadcastMessage']);
-    Route::post('/users/approve', [AdminUserController::class, 'approveUser']);
+    Route::put('/approve-seller', [AdminUserController::class, 'approveSeller']);
+    Route::put('/reject-seller', [AdminUserController::class, 'rejectSeller']);
+    Route::get('/seller-requests', [AdminUserController::class, 'sellerRequests']);
+    Route::get('/seller-requests/show/{user_id?}', [AdminUserController::class, 'showSellerRequest']);
 
     // Admin Category Management
-    Route::post('categories', [CategoryController::class, 'store']);
+    Route::post('categories/create', [CategoryController::class, 'store']);
     Route::post('categories/update', [CategoryController::class, 'update']);
     Route::post('categories/delete', [CategoryController::class, 'destroy']);
 

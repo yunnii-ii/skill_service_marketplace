@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('service_id')->constrained('services');
             $table->foreignId('buyer_id')->constrained('users');
             $table->foreignId('seller_id')->constrained('users');
-            $table->enum('status', ['pending', 'accepted', 'rejected', 'completed', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'accepted', 'in_progress', 'rejected', 'completed', 'cancelled'])->default('pending');
             $table->date('due_date');
             $table->text('order_note')->nullable();
             $table->timestamps();
