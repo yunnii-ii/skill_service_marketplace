@@ -7,7 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Service extends Model
 {
     //
-    protected $fillable = ['user_id', 'category_id', 'title', 'description', 'price', 'estimated_days', 'image'];
+    protected $fillable = ['user_id', 'category_id', 'title', 'description', 'price', 'estimated_days', 'tags', 'image', 'is_active'];
+
+    protected $casts = [
+        'tags' => 'array',
+        'is_active' => 'boolean',
+    ];
 
     public function bookings()
     {

@@ -10,6 +10,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         DB::statement("ALTER TABLE bookings MODIFY status ENUM('pending', 'accepted', 'in_progress', 'rejected', 'completed', 'cancelled') DEFAULT 'pending'");
     }
 
@@ -21,6 +25,10 @@ return new class extends Migration
         DB::table('bookings')
             ->where('status', 'in_progress')
             ->update(['status' => 'accepted']);
+
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
 
         DB::statement("ALTER TABLE bookings MODIFY status ENUM('pending', 'accepted', 'rejected', 'completed', 'cancelled') DEFAULT 'pending'");
     }

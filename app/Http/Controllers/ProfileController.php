@@ -4,21 +4,29 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
+    private const USER_STATUSES = [
+        0 => 'Active',
+        1 => 'Inactive',
+        2 => 'Suspended',
+    ];
+
     private const SELLER_REQUEST_STATUSES = [
         0 => 'Pending',
         1 => 'Approved',
         2 => 'Rejected',
     ];
 
-    //
+    
     public function show(){
         $user = Auth::user();
 
         return response()->json([
             'success'=> true,
+            'message' => 'Profile details.',
             'data'=> $this->formatUser($user)
         ], 200);
     }
@@ -30,8 +38,8 @@ class ProfileController extends Controller
                 'message'=>'You do not have permission to edit this profile'], 403);
         }
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
             'phone_number' => 'nullable|string|max:255',
             'company_name' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:255',
@@ -41,7 +49,7 @@ class ProfileController extends Controller
             'cover_photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
         ]);
 
-        $updateData = $request->only([
+        $updateData = array_filter($request->only([
             'name',
             'email',
             'phone_number',
@@ -49,14 +57,23 @@ class ProfileController extends Controller
             'position',
             'address',
             'bio',
-        ]);
+        ]), fn ($value) => ! is_null($value));
 
         if ($request->hasFile('avatar')) {
+            $this->deletePublicFile($user->avatar);
             $updateData['avatar'] = $request->file('avatar')->store('avatars', 'public');
         }
 
         if ($request->hasFile('cover_photo')) {
+            $this->deletePublicFile($user->cover_photo);
             $updateData['cover_photo'] = $request->file('cover_photo')->store('cover_photos', 'public');
+        }
+
+        if (empty($updateData)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please send at least one profile detail to update.',
+            ], 422);
         }
 
         $user->update($updateData);
@@ -64,6 +81,67 @@ class ProfileController extends Controller
         return response()->json([
             'success'=> true,
             'message'=>'Profile updated successfully.',
+            'data'=> $this->formatUser($user->fresh())
+        ], 200);
+    }
+
+    public function deleteDetails(Request $request)
+    {
+        $user = Auth::user();
+
+        if (! $user->hasAnyRole(['buyer', 'seller'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You do not have permission to delete this profile details.',
+            ], 403);
+        }
+
+        $request->validate([
+            'phone_number' => 'sometimes|boolean',
+            'company_name' => 'sometimes|boolean',
+            'position' => 'sometimes|boolean',
+            'address' => 'sometimes|boolean',
+            'bio' => 'sometimes|boolean',
+            'avatar' => 'sometimes|boolean',
+            'cover_photo' => 'sometimes|boolean',
+        ]);
+
+        $deletableFields = [
+            'phone_number',
+            'company_name',
+            'position',
+            'address',
+            'bio',
+            'avatar',
+            'cover_photo',
+        ];
+
+        $updateData = [];
+
+        foreach ($deletableFields as $field) {
+            if (! $request->boolean($field)) {
+                continue;
+            }
+
+            if (in_array($field, ['avatar', 'cover_photo'], true)) {
+                $this->deletePublicFile($user->{$field});
+            }
+
+            $updateData[$field] = null;
+        }
+
+        if (empty($updateData)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please choose at least one profile detail to delete.',
+            ], 422);
+        }
+
+        $user->update($updateData);
+
+        return response()->json([
+            'success'=> true,
+            'message'=>'Profile details deleted successfully.',
             'data'=> $this->formatUser($user->fresh())
         ], 200);
     }
@@ -81,6 +159,8 @@ class ProfileController extends Controller
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'role' => $user->getRoleNames()->first() ?? 'buyer',
+            'status' => self::USER_STATUSES[$user->is_banned] ?? 'Active',
             'phone_number' => $user->phone_number,
             'company_name' => $user->company_name,
             'position' => $user->position,
@@ -95,5 +175,12 @@ class ProfileController extends Controller
             'created_at' => $user->created_at,
             'updated_at' => $user->updated_at,
         ];
+    }
+
+    private function deletePublicFile(?string $path): void
+    {
+        if ($path && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
     }
 }

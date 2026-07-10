@@ -15,6 +15,8 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\SavedServiceController;
+use App\Http\Controllers\SavedSellerController;
 use App\Http\Controllers\Seller\ServiceController;
 use App\Http\Controllers\SellerRequestController;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +35,8 @@ Route::post('/seller/reviews', [ReviewController::class, 'getSellerReviews']);
 
 Route::get('/services', [ServiceController::class, 'index']);
 Route::get('/services/top-rated', [ServiceController::class, 'topRated']);
+Route::get('/service-tags', [ServiceController::class, 'tags']);
+Route::get('/payment-methods', [BookingController::class, 'paymentMethods']);
 
 Route::get('/guest/services', [BookingController::class, 'availableServices']);
 
@@ -46,12 +50,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
     Route::post('/profile/update', [ProfileController::class, 'update']);
+    Route::post('/profile/delete-details', [ProfileController::class, 'deleteDetails']);
     // Route::post('/auth/change-password', [PasswordController::class, 'changePassword']);
     Route::post('/user/submit-seller-request', [SellerRequestController::class, 'submitSellerRequest']);
 
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/notifications/unread', [NotificationController::class, 'unread']);
     Route::post('/notifications/mark-as-read', [NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/mark-one-as-read', [NotificationController::class, 'markOneAsRead']);
+    Route::post('/notifications/delete', [NotificationController::class, 'destroy']);
 
     // Reviews
     Route::post('/buyer/reviews', [ReviewController::class, 'store']);
@@ -59,12 +67,23 @@ Route::middleware('auth:sanctum')->group(function () {
     // Messages / Chat
     Route::post('/chat/send', [MessageController::class, 'store']);
     Route::post('/chat/history', [MessageController::class, 'getMessages']);
+    Route::get('/chat/conversations', [MessageController::class, 'conversations']);
+    Route::get('/chat/unread', [MessageController::class, 'unread']);
+    Route::post('/chat/mark-as-read', [MessageController::class, 'markAsRead']);
 
     // Seller Routes
     Route::prefix('seller')->group(function () {
+        Route::get('/dashboard', [ServiceController::class, 'dashboard']);
+        Route::get('/analytics', [ServiceController::class, 'analytics']);
+        Route::get('/earnings', [ServiceController::class, 'earnings']);
+        Route::get('/services', [ServiceController::class, 'myServices']);
+        Route::get('/services/show/{service_id?}', [ServiceController::class, 'showOwnService']);
         Route::post('/services', [ServiceController::class, 'store']);
         Route::post('/services/update', [ServiceController::class, 'update']);
         Route::post('/services/delete', [ServiceController::class, 'destroy']);
+        Route::post('/services/change-status', [ServiceController::class, 'changeServiceStatus']);
+        Route::get('/bookings', [ServiceController::class, 'bookings']);
+        Route::get('/bookings/show/{booking_id?}', [ServiceController::class, 'showBooking']);
         Route::post('/bookings/change-status', [ServiceController::class, 'changeBookingStatus']);
     });
 
@@ -72,6 +91,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('buyer')->group(function () {
         Route::post('/book-service', [BookingController::class, 'store']);
         Route::get('/my-orders', [BookingController::class, 'myBookings']);
+        Route::get('/bookings/show/{booking_id?}', [BookingController::class, 'show']);
+        Route::post('/bookings/accept-completion', [BookingController::class, 'acceptCompletion']);
+        Route::get('/services/show/{service_id?}', [ServiceController::class, 'show']);
+        Route::get('/stats', [BookingController::class, 'buyerStats']);
+        Route::get('/saved-services', [SavedServiceController::class, 'index']);
+        Route::post('/save-service', [SavedServiceController::class, 'store']);
+        Route::post('/saved-services/delete', [SavedServiceController::class, 'destroy']);
+        Route::get('/saved-sellers', [SavedSellerController::class, 'index']);
+        Route::post('/save-seller', [SavedSellerController::class, 'store']);
+        Route::post('/saved-sellers/delete', [SavedSellerController::class, 'destroy']);
     });
 
 });

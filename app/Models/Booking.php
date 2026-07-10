@@ -9,6 +9,13 @@ class Booking extends Model
     //
     protected $fillable = [
         'buyer_id', 'seller_id', 'service_id', 'order_note', 'due_date', 'status',
+        'payment_method', 'payment_status', 'payment_proof',
+        'buyer_accepted_at', 'paid_at',
+    ];
+
+    protected $casts = [
+        'buyer_accepted_at' => 'datetime',
+        'paid_at' => 'datetime',
     ];
 
     public function service()

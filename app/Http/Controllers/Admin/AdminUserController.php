@@ -23,6 +23,12 @@ class AdminUserController extends Controller
         2 => 'Suspended',
     ];
 
+    private const SELLER_REQUEST_STATUSES = [
+        0 => 'Pending',
+        1 => 'Approved',
+        2 => 'Rejected',
+    ];
+
     // all user lists
     public function index()
     {
@@ -32,7 +38,7 @@ class AdminUserController extends Controller
         ]);
     }
 
-    //
+
     public function show(Request $request, ?int $userId = null)
     {
         $request->merge([
@@ -266,7 +272,6 @@ class AdminUserController extends Controller
         ]);
     }
 
-    // view each seller request
     public function showSellerRequest(Request $request, ?int $userId = null)
     {
         $request->merge([
@@ -298,7 +303,9 @@ class AdminUserController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'role' => $role,
-            'is_approved' => (bool) $user->is_approved,
+            'status' => self::USER_STATUSES[$user->is_banned] ?? 'Active',
+            'is_approved' => (int) $user->is_approved === 1,
+            'approval_status' => self::SELLER_REQUEST_STATUSES[$user->is_approved] ?? 'Pending',
             'phone_number' => $user->phone_number,
             'company_name' => $user->company_name,
             'position' => $user->position,
@@ -308,7 +315,6 @@ class AdminUserController extends Controller
             'avatar_url' => $user->avatar ? asset('storage/'.$user->avatar) : null,
             'cover_photo' => $user->cover_photo,
             'cover_photo_url' => $user->cover_photo ? asset('storage/'.$user->cover_photo) : null,
-            'status' => self::USER_STATUSES[$user->is_banned] ?? 'Active',
             'requested_at' => $user->updated_at,
         ];
     }
@@ -394,6 +400,7 @@ class AdminUserController extends Controller
             'description' => $service->description,
             'price' => $service->price,
             'estimated_days' => $service->estimated_days,
+            'tags' => $service->tags ?? [],
             'image' => $service->image,
             'average_rating' => round($service->reviews->avg('rating'), 1) ?: 0,
             'total_reviews' => $service->reviews->count(),
@@ -476,6 +483,46 @@ class AdminUserController extends Controller
             'success' => true,
             'message' => "User {$user->name} has been approved as seller and notified.",
             'data' => $this->formatUser($user, 0),
+        ]);
+    }
+
+    // reject seller request
+    public function rejectSeller(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'message' => 'required|string|max:1000',
+        ]);
+
+        $user = User::findOrFail($request->user_id);
+
+        if ($user->hasRole('seller')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This user is already a seller and cannot be rejected.',
+                'data' => $this->formatUser($user, 0),
+            ], 400);
+        }
+
+        $user->is_approved = 2;
+        $user->save();
+        $user->notify(new SellerRequestNotification(
+            'Your seller request has been rejected. Message: '.$request->message,
+            'seller_rejected',
+            [
+                'message' => $request->message,
+                'user_id' => $user->id,
+            ]
+        ));
+
+        $user = $user->fresh();
+        $user->load('roles');
+
+        return response()->json([
+            'success' => true,
+            'message' => "User {$user->name}'s seller request has been rejected and notified.",
+            'reason' => $request->message,
+            'data' => $this->formatSellerRequest($user),
         ]);
     }
 }

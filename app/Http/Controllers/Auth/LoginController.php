@@ -42,6 +42,7 @@ class LoginController extends Controller
         $user->load('roles');
 
         $token = $user->createToken('auth_token')->plainTextToken;
+        // $role = $user->getRoleNames()->first() ?? 'buyer';
         $role = 'buyer';
         if ($user->hasRole('admin')) {
             $role = 'admin';

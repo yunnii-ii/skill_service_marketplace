@@ -7,7 +7,7 @@ use App\Models\Review;
 use Illuminate\Http\Request;
 
 class ReviewController extends Controller
-{
+{   //review create
     public function store(Request $request)
     {
         $request->validate([
@@ -29,6 +29,13 @@ class ReviewController extends Controller
             return response()->json([
                 'success' => 'false',
                 'message' => 'You can only review completed bookings.',
+            ], 400);
+        }
+
+        if ($booking->payment_status !== 'paid') {
+            return response()->json([
+                'success' => 'false',
+                'message' => 'Please accept completion and release payment before reviewing this booking.',
             ], 400);
         }
 
@@ -55,6 +62,7 @@ class ReviewController extends Controller
         ], 201);
     }
 
+    //view seller reviews
     public function getSellerReviews(Request $request)
     {
         $request->validate([

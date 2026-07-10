@@ -22,7 +22,7 @@ class PasswordController extends Controller
             return response()->json([
                 'success' => 'false',
                 'message' => 'Current password does not match.',
-            ], 400);
+            ], 422);
         }
 
         $user->password = Hash::make($request->new_password);
