@@ -19,6 +19,7 @@ return new class extends Migration
             $table->text('description');
             $table->decimal('price', 10, 2);
             $table->string('estimated_days');
+            $table->json('tags')->nullable();
             $table->string('image')->nullable();
             $table->timestamps();
         });

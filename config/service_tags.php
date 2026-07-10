@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'Web Development',
+    'Mobile Development',
+    'UI/UX Design',
+    'Flutter',
+    'Laravel',
+    'PHP',
+    'JavaScript',
+    'React',
+    'Vue',
+    'Node.js',
+    'Python',
+    'Django',
+    'WordPress',
+    'Graphic Design',
+    'Logo Design',
+    'Video Editing',
+    'Content Writing',
+    'SEO',
+    'Digital Marketing',
+    'Translation',
+    'Data Entry',
+    'Consulting',
+];

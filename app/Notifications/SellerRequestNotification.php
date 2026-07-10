@@ -13,7 +13,11 @@ class SellerRequestNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct(protected $message)
+    public function __construct(
+        protected string $message,
+        protected ?string $type = null,
+        protected array $data = []
+    )
     {
         //
     }
@@ -32,6 +36,8 @@ class SellerRequestNotification extends Notification
     {
         return [
             'message' => $this->message,
+            'type' => $this->type,
+            'data' => $this->data,
         ];
     }
 

@@ -10,6 +10,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         DB::statement('ALTER TABLE users MODIFY is_banned TINYINT DEFAULT 0');
     }
 
@@ -21,6 +25,10 @@ return new class extends Migration
         DB::table('users')
             ->where('is_banned', 2)
             ->update(['is_banned' => 1]);
+
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
 
         DB::statement('ALTER TABLE users MODIFY is_banned BOOLEAN DEFAULT false');
     }

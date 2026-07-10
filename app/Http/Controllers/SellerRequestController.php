@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Notification;
 
 class SellerRequestController extends Controller
 {
+    //request form
     public function submitSellerRequest(Request $request)
     {
         $user = auth()->user();
